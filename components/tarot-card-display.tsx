@@ -7,9 +7,15 @@ interface TarotCardDisplayProps {
   cardName: string
   cardImage: string
   interpretation: string
+  isReversed?: boolean
 }
 
-export function TarotCardDisplay({ cardName, cardImage, interpretation }: TarotCardDisplayProps) {
+export function TarotCardDisplay({
+  cardName,
+  cardImage,
+  interpretation,
+  isReversed = false,
+}: TarotCardDisplayProps) {
   return (
     <section className="min-h-screen flex flex-col items-center justify-start px-4 py-8">
       {/* 标题 */}
@@ -18,17 +24,36 @@ export function TarotCardDisplay({ cardName, cardImage, interpretation }: TarotC
         <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto" />
       </div>
 
-      <div className="card-draw mb-6">
-        <Card className="w-56 h-80 bg-card border-2 border-primary/30 shadow-2xl overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-          <Image src={cardImage || "/placeholder.svg"} alt={cardName} fill className="object-cover" priority />
+      {/* 卡面展示区域 */}
+      <div className="card-draw mb-6 flex justify-center">
+        <Card className="w-[16rem] h-[28.4rem] bg-card border-2 border-primary/30 shadow-2xl overflow-hidden flex items-center justify-center">
+          <div
+            className="transition-transform duration-700 ease-in-out flex items-center justify-center"
+            style={{
+              transform: isReversed ? "rotate(180deg)" : "none",
+              transformOrigin: "center center",
+            }}
+          >
+            <Image
+              src={cardImage || "/placeholder.svg"}
+              alt={cardName}
+              width={1100 / 5}   // 保持原图比例缩放
+              height={1920 / 5}  // 高度比例匹配
+              className="rounded-md object-contain select-none"
+              priority
+            />
+          </div>
         </Card>
       </div>
 
+      {/* 解牌文字 */}
       <div className="max-w-2xl w-full text-center space-y-4 px-6 mb-8">
-        <p className="text-foreground leading-relaxed text-balance text-base">{interpretation}</p>
+        <p className="text-foreground leading-relaxed text-balance text-base whitespace-pre-wrap">
+          {interpretation}
+        </p>
       </div>
 
+      {/* 向下滑动提示 */}
       <div className="flex-1 flex flex-col justify-end pb-8">
         <div className="flex flex-col items-center gap-2 animate-bounce">
           <p className="text-sm text-muted-foreground">{"向下滑动继续探索"}</p>

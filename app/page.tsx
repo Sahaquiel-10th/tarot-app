@@ -14,20 +14,29 @@ export default function TarotPage() {
   } | null>(null)
 
   useEffect(() => {
-    // 模拟抽卡动画完成后获取数据
-    const timer = setTimeout(() => {
-      // 这里应该调用你的API获取真实数据
-      // 示例数据
-      setTarotData({
-        cardName: "愚者",
-        cardImage: "/tarot-card-the-fool-mystical-design.jpg",
-        interpretation:
-          "愚者代表新的开始、纯真和冒险精神。这张牌鼓励你以开放的心态迎接未知，相信直觉，勇敢地踏上新的旅程。",
-      })
-      setStage("display")
-    }, 2500)
+    async function fetchTarotData() {
+      try {
+        const res = await fetch("/api/draw", { method: "POST" })
+        const data = await res.json()
+        // 假设智能体返回结构包含 interpretation 字段
+        setTarotData({
+          cardName: data.cardName || "未知塔罗",
+          cardImage: "/tarot-card-the-fool-mystical-design.jpg",
+          interpretation: data.interpretation || JSON.stringify(data, null, 2),
+        })
+        setStage("display")
+      } catch (err) {
+        console.error("API 调用失败:", err)
+        setTarotData({
+          cardName: "调用失败",
+          cardImage: "/tarot-card-the-fool-mystical-design.jpg",
+          interpretation: "无法连接智能体，请稍后重试。",
+        })
+        setStage("display")
+      }
+    }
 
-    return () => clearTimeout(timer)
+    fetchTarotData()
   }, [])
 
   return (

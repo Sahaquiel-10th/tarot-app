@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 
 export async function POST() {
-  const apiUrl = 'https://api.cn.reai.com/app/blocks/api/46736acea1584fb19cb44/run';
+  const apiUrl = 'https://api.cn.reai.com/app/blocks/api/5fe50a3798b84e6b87836/run';
   const apiKey = process.env.WAINAO_API_KEY;
 
   console.log("✅ Key 前缀:", apiKey?.slice(0, 8));

@@ -5,8 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-const API_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -45,7 +43,7 @@ export function ChatInterface({ tarotContent }: ChatInterfaceProps) {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE_PATH}/api/tarot-chat`, {
+      const res = await fetch("/api/tarot-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

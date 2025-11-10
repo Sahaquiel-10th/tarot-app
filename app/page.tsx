@@ -5,8 +5,6 @@ import { CardDrawAnimation } from "@/components/card-draw-animation"
 import { TarotCardDisplay } from "@/components/tarot-card-display"
 import { ChatInterface } from "@/components/chat-interface"
 
-const API_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
-
 export default function TarotPage() {
   const [stage, setStage] = useState<"drawing" | "display">("drawing")
   const [tarotData, setTarotData] = useState<{
@@ -20,7 +18,7 @@ export default function TarotPage() {
     async function fetchTarotData() {
       try {
         setStage("drawing")
-        const res = await fetch(`${API_BASE_PATH}/api/draw`, { method: "POST" })
+        const res = await fetch("/api/draw", { method: "POST" })
         const data = await res.json()
 
         // 提取卡牌信息

@@ -5,6 +5,9 @@ import { CardDrawAnimation } from "@/components/card-draw-animation"
 import { TarotCardDisplay } from "@/components/tarot-card-display"
 import { ChatInterface } from "@/components/chat-interface"
 
+// ✅ basePath 全局常量
+const BASE_PATH = "/tarot"
+
 export default function TarotPage() {
   const [stage, setStage] = useState<"drawing" | "display">("drawing")
   const [tarotData, setTarotData] = useState<{
@@ -18,7 +21,9 @@ export default function TarotPage() {
     async function fetchTarotData() {
       try {
         setStage("drawing")
-        const res = await fetch("/api/draw", { method: "POST" })
+
+        const res = await fetch(`${BASE_PATH}/api/draw`, { method: "POST" })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
 
         // 提取卡牌信息
@@ -52,17 +57,18 @@ export default function TarotPage() {
 
         setTarotData({
           cardName: card?.cardName || "未知塔罗",
-          cardImage: `/RWS_Tarot_${card?.cardIndex ?? 0}.jpg`, // 从 public 根目录读取
+          // ✅ 加上 basePath，修复图裂问题
+          cardImage: `${BASE_PATH}/RWS_Tarot_${card?.cardIndex ?? 0}.jpg`,
           interpretation: answer || "（暂无解牌文本）",
           isReversed: card?.isReversed ?? false,
         })
 
-        setStage("display") // API 返回后切换到展示阶段
+        setStage("display")
       } catch (e) {
-        console.error("API 调用失败:", e)
+        console.error("❌ API 调用失败:", e)
         setTarotData({
           cardName: "调用失败",
-          cardImage: "/placeholder.jpg",
+          cardImage: `${BASE_PATH}/placeholder.jpg`, // ✅ 这里也加上 basePath
           interpretation: "无法连接智能体，请稍后重试。",
           isReversed: false,
         })
@@ -85,7 +91,6 @@ export default function TarotPage() {
             isReversed={tarotData.isReversed}
           />
 
-          {/* ✅ 将完整解牌文本通过 tarotContent prop 传递给 ChatInterface，确保聊天接口使用该内容作为上下文 */}
           <ChatInterface tarotContent={tarotData.interpretation} />
         </div>
       )}

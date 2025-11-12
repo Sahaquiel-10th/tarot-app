@@ -1,18 +1,20 @@
 // next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 让站点挂到 /tarot
+  // ① 跑在子路径 /tarot
   basePath: '/tarot',
-  // 建议加上：导出时会生成 /tarot/index.html
   trailingSlash: true,
 
-  // 静态导出
+  // ② 静态导出
   output: 'export',
 
-  // 导出阶段禁用 next/image 的优化（不然会报错）
+  // ③ 关键：资源固定用根路径 /_next，避免 /tarot/_next 404
+  assetPrefix: '',
+
+  // ④ 导出时禁用 next/image 优化
   images: { unoptimized: true },
 
-  // 给前端读到的前缀（你的 fetch 代码会用到）
+  // ⑤ 前端可用的前缀（你代码里有用到）
   env: { NEXT_PUBLIC_BASE_PATH: '/tarot' },
 };
 

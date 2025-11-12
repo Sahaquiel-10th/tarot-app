@@ -5,20 +5,54 @@ import { CardDrawAnimation } from "@/components/card-draw-animation"
 import { TarotCardDisplay } from "@/components/tarot-card-display"
 import { ChatInterface } from "@/components/chat-interface"
 
+const LIMIT_FALLBACK_MESSAGE = "今日窥探命运次数太多了，窥探之眼已紧闭"
+const formatLimitMessage = (message: string) =>
+  message.includes("\n") ? message : message.replace("，", ",\n")
+
+const formatCountdown = (ms?: number | null) => {
+  const safeMs = typeof ms === "number" && ms > 0 ? ms : 0
+  const totalSeconds = Math.floor(safeMs / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const pad = (value: number) => value.toString().padStart(2, "0")
+  return `${pad(hours)}小时${pad(minutes)}分钟${pad(seconds)}秒`
+}
+
 export default function TarotPage() {
-  const [stage, setStage] = useState<"drawing" | "display">("drawing")
+  const [stage, setStage] = useState<"drawing" | "display" | "limited">("drawing")
   const [tarotData, setTarotData] = useState<{
     cardName: string
     cardImage: string
     interpretation: string
     isReversed: boolean
   } | null>(null)
+  const [limitMessage, setLimitMessage] = useState<string | null>(null)
+  const [limitCountdown, setLimitCountdown] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchTarotData() {
       try {
+        setLimitMessage(null)
+        setLimitCountdown(null)
         setStage("drawing")
         const res = await fetch("/api/draw", { method: "POST" })
+
+        if (res.status === 429) {
+          const data = await res.json().catch(() => ({}))
+          const rawMessage = data?.error || LIMIT_FALLBACK_MESSAGE
+          setLimitMessage(formatLimitMessage(rawMessage))
+          setLimitCountdown(
+            formatCountdown(typeof data?.nextRetryMs === "number" ? data.nextRetryMs : null)
+          )
+          setStage("limited")
+          return
+        }
+
+        if (!res.ok) {
+          throw new Error("API 请求失败")
+        }
+
         const data = await res.json()
 
         // 提取卡牌信息
@@ -74,7 +108,7 @@ export default function TarotPage() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center">
+    <main className="relative min-h-screen bg-background flex flex-col items-center justify-center">
       {stage === "drawing" && <CardDrawAnimation />}
       {stage === "display" && tarotData && (
         <div className="flex flex-col items-center justify-center space-y-6">
@@ -87,6 +121,19 @@ export default function TarotPage() {
 
           {/* ✅ 将完整解牌文本通过 tarotContent prop 传递给 ChatInterface，确保聊天接口使用该内容作为上下文 */}
           <ChatInterface tarotContent={tarotData.interpretation} />
+        </div>
+      )}
+      {stage === "limited" && limitMessage && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center space-y-4">
+          <p className="text-foreground/80 text-2xl sm:text-4xl font-semibold leading-relaxed whitespace-pre-line">
+            {limitMessage}
+          </p>
+          <p className="text-foreground/70 text-lg sm:text-2xl">
+            距离下次窥探命运，还剩{" "}
+            <span className="font-medium text-primary">
+              {limitCountdown ?? formatCountdown()}
+            </span>
+          </p>
         </div>
       )}
     </main>

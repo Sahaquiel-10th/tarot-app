@@ -97,7 +97,7 @@ const canInvoke = (ip: string) => {
 };
 
 export async function POST(request: NextRequest) {
-  const apiUrl = 'https://api.cn.reai.com/app/blocks/api/5fe50a3798b84e6b87836/run';
+  const apiUrl = 'https://api.cn.reai.com/app/blocks/api/4420e66e6ddc40bc8f5f6/run';
   const apiKey = process.env.WAINAO_API_KEY;
   const clientIp = getClientIp(request);
 
